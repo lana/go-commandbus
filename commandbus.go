@@ -1,4 +1,4 @@
-package main
+package commandbus
 
 import (
 	"context"
@@ -13,12 +13,21 @@ type CommandBus interface {
 	// future executions
 	Register(string, interface{}) error
 
+	// Handlers returns all registered handlers
+	Handlers() map[string]interface{}
+
 	// Execute send a given Command to its assigned CommandHandler
 	Execute(context.Context, interface{}) error
 }
 
 type bus struct {
 	handlers map[string]interface{}
+}
+
+func New() CommandBus {
+	return &bus{
+		handlers: make(map[string]interface{}, 0),
+	}
 }
 
 func (b *bus) Register(cmdName string, fn interface{}) error {
@@ -33,6 +42,10 @@ func (b *bus) Register(cmdName string, fn interface{}) error {
 	b.handlers[cmdName] = fn
 
 	return nil
+}
+
+func (b *bus) Handlers() map[string]interface{} {
+	return b.handlers
 }
 
 func (b *bus) Execute(ctx context.Context, cmd interface{}) error {
@@ -64,10 +77,4 @@ func (b *bus) buildHandlerArgs(args []interface{}) []reflect.Value {
 	}
 
 	return reflectedArgs
-}
-
-func New() CommandBus {
-	return &bus{
-		handlers: make(map[string]interface{}, 0),
-	}
 }
