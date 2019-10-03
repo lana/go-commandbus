@@ -9,11 +9,11 @@ import (
 
 // CommandBus is the definition of how command should be handled
 type CommandBus interface {
-	// Register asign a Command to a CommandHandle for
+	// Register assign a Command to a CommandHandle for
 	// future executions
 	Register(string, interface{}) error
 
-	// Execute send a given Command to its asigned CommandHandler
+	// Execute send a given Command to its assigned CommandHandler
 	Execute(context.Context, interface{}) error
 }
 
