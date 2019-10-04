@@ -29,9 +29,21 @@ func TestRegisterHandlers(t *testing.T) {
 			t.Error("Registered handler is different from the expected one")
 		}
 	}
+
+	// invalid handler
+	fooCmd := struct {}{}
+	invalidHandler := struct{}{}
+	if err := bus.Register(fooCmd, invalidHandler); err == nil {
+		t.Error("Invalid handler was accepted. Register must only accept functions")
+	}
+
+	// duplicated
+	if err := bus.Register(&Cmd{}, CmdHandler); err == nil {
+		t.Error("Bus must not accept duplicated commands")
+	}
 }
 
-func TestRegisteredHandler(t *testing.T) {
+func TestExecuteRegisteredHandler(t *testing.T) {
 	bus := New()
 	if err := bus.Register(&Cmd{}, CmdHandler); err != nil {
 		t.Errorf("Failed to register command: %v", err)
@@ -48,5 +60,11 @@ func TestRegisteredHandler(t *testing.T) {
 
 	if c.c != expected {
 		t.Errorf("Execution number is wrong. Expected %d, got %d", expected, c.c)
+	}
+
+	// try to execute an unregistered command
+	invalidCommand := struct {}{}
+	if err := bus.Execute(context.Background(), invalidCommand); err == nil {
+		t.Error("Invalid command was executed without errors")
 	}
 }
