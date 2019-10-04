@@ -11,8 +11,9 @@ type Cmd struct {
 	c int
 }
 
-func CmdHandler(ctx context.Context, cmd *Cmd) {
+func CmdHandler(ctx context.Context, cmd *Cmd) error {
 	cmd.c++
+	return nil
 }
 
 type ErrorCmd struct {
@@ -88,5 +89,34 @@ func TestExecutionReturnedError(t *testing.T) {
 	err := bus.Execute(context.Background(), cmd)
 	if err != cmd.err {
 		t.Errorf("Failed to assert command error. Expected \"%v\", got \"%v\"", cmd.err, err)
+	}
+}
+
+func TestExecutionWithMiddleware(t *testing.T) {
+	bus := New()
+	if err := bus.Register(&Cmd{}, CmdHandler); err != nil {
+		t.Errorf("Failed to register command: %v", err)
+	}
+
+	// this middleware will be executed before the handler,
+	// making the command counter equals to 10.
+	bus.Use(func(next interface{}) interface{} {
+		return func(ctx context.Context, cmd interface{}) interface{} {
+			if c, ok := cmd.(*Cmd); ok {
+				c.c += 10 // add 10 to the command value
+			}
+
+			return next
+		}
+	})
+
+	c := &Cmd{}
+	expected := 10
+	if err := bus.Execute(context.Background(), c); err != nil {
+		t.Errorf("Failed to execute command: %v", err)
+	}
+
+	if c.c != expected {
+		t.Errorf("Execution number is wrong. Expected %d, got %d", expected, c.c)
 	}
 }
