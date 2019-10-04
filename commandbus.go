@@ -57,9 +57,18 @@ func (b *bus) Execute(ctx context.Context, cmd interface{}) error {
 	}
 
 	fn := reflect.ValueOf(handler)
-	args := b.buildHandlerArgs([]interface{}{ctx, cmd})
+	args := buildHandlerArgs([]interface{}{ctx, cmd})
 
-	fn.Call(args) // todo return errors here
+	results := buildHandlerResults(fn.Call(args))
+	if len(results) < 1 {
+		return nil
+	}
+
+	r := results[:1][0]
+	if err, ok := r.(error); ok {
+		return err
+	}
+
 	return nil
 }
 
@@ -71,7 +80,17 @@ func (b *bus) handler(cmdName string) (interface{}, error) {
 	return nil, errors.New("handler not found for command")
 }
 
-func (b *bus) buildHandlerArgs(args []interface{}) []reflect.Value {
+func buildHandlerResults(res []reflect.Value) []interface{} {
+	results := make([]interface{}, 0)
+
+	for _, r := range res {
+		results = append(results, r.Interface())
+	}
+
+	return results
+}
+
+func buildHandlerArgs(args []interface{}) []reflect.Value {
 	reflectedArgs := make([]reflect.Value, 0)
 
 	for _, arg := range args {

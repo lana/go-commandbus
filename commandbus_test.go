@@ -2,6 +2,7 @@ package commandbus
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -12,6 +13,14 @@ type Cmd struct {
 
 func CmdHandler(ctx context.Context, cmd *Cmd) {
 	cmd.c++
+}
+
+type ErrorCmd struct {
+	err error
+}
+
+func ErrorCmdHandler(ctx context.Context, cmd *ErrorCmd) error {
+	return cmd.err
 }
 
 func TestRegisterHandlers(t *testing.T) {
@@ -31,7 +40,7 @@ func TestRegisterHandlers(t *testing.T) {
 	}
 
 	// invalid handler
-	fooCmd := struct {}{}
+	fooCmd := struct{}{}
 	invalidHandler := struct{}{}
 	if err := bus.Register(fooCmd, invalidHandler); err == nil {
 		t.Error("Invalid handler was accepted. Register must only accept functions")
@@ -63,8 +72,21 @@ func TestExecuteRegisteredHandler(t *testing.T) {
 	}
 
 	// try to execute an unregistered command
-	invalidCommand := struct {}{}
+	invalidCommand := struct{}{}
 	if err := bus.Execute(context.Background(), invalidCommand); err == nil {
 		t.Error("Invalid command was executed without errors")
+	}
+}
+
+func TestExecutionReturnedError(t *testing.T) {
+	bus := New()
+	if err := bus.Register(&ErrorCmd{}, ErrorCmdHandler); err != nil {
+		t.Errorf("Failed to register command: %v", err)
+	}
+
+	cmd := &ErrorCmd{err: errors.New("this is an error")}
+	err := bus.Execute(context.Background(), cmd)
+	if err != cmd.err {
+		t.Errorf("Failed to assert command error. Expected \"%v\", got \"%v\"", cmd.err, err)
 	}
 }
