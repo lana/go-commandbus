@@ -16,7 +16,7 @@ func CmdHandler(ctx context.Context, cmd *Cmd) {
 
 func TestRegisterHandlers(t *testing.T) {
 	bus := New()
-	if err := bus.Register(reflect.TypeOf(&Cmd{}).String(), CmdHandler); err != nil {
+	if err := bus.Register(&Cmd{}, CmdHandler); err != nil {
 		t.Errorf("Failed to register command: %v", err)
 	}
 
@@ -33,7 +33,7 @@ func TestRegisterHandlers(t *testing.T) {
 
 func TestRegisteredHandler(t *testing.T) {
 	bus := New()
-	if err := bus.Register(reflect.TypeOf(&Cmd{}).String(), CmdHandler); err != nil {
+	if err := bus.Register(&Cmd{}, CmdHandler); err != nil {
 		t.Errorf("Failed to register command: %v", err)
 	}
 

@@ -11,7 +11,7 @@ import (
 type CommandBus interface {
 	// Register assign a Command to a CommandHandle for
 	// future executions
-	Register(string, interface{}) error
+	Register(interface{}, interface{}) error
 
 	// Handlers returns all registered handlers
 	Handlers() map[string]interface{}
@@ -30,7 +30,9 @@ func New() CommandBus {
 	}
 }
 
-func (b *bus) Register(cmdName string, fn interface{}) error {
+func (b *bus) Register(cmd interface{}, fn interface{}) error {
+	cmdName := reflect.TypeOf(cmd).String()
+
 	if reflect.TypeOf(fn).Kind() != reflect.Func {
 		return fmt.Errorf("%s is not a reflect.Func", reflect.TypeOf(fn))
 	}
