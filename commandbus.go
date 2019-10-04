@@ -7,6 +7,10 @@ import (
 	"reflect"
 )
 
+// MiddlewareFunc defines a function to process middleware.
+// it receives the next Handler must return another handler
+type MiddlewareFunc func(interface{}) interface{}
+
 // CommandBus is the definition of how command should be handled
 type CommandBus interface {
 	// Register assign a Command to a CommandHandle for
@@ -16,17 +20,22 @@ type CommandBus interface {
 	// Handlers returns all registered handlers
 	Handlers() map[string]interface{}
 
-	// Execute send a given Command to its assigned CommandHandler
+	// Use adds middleware to the chain
+	Use(...MiddlewareFunc)
+
+	// Execute send a given Command to its assigned command handler
 	Execute(context.Context, interface{}) error
 }
 
 type bus struct {
-	handlers map[string]interface{}
+	handlers   map[string]interface{}
+	middleware []MiddlewareFunc
 }
 
 func New() CommandBus {
 	return &bus{
-		handlers: make(map[string]interface{}, 0),
+		handlers:   make(map[string]interface{}, 0),
+		middleware: make([]MiddlewareFunc, 0),
 	}
 }
 
@@ -38,7 +47,7 @@ func (b *bus) Register(cmd interface{}, fn interface{}) error {
 	}
 
 	if _, err := b.handler(cmdName); err == nil {
-		return errors.New("command already asigned to a handler")
+		return errors.New("command already assigned to a handler")
 	}
 
 	b.handlers[cmdName] = fn
@@ -50,13 +59,17 @@ func (b *bus) Handlers() map[string]interface{} {
 	return b.handlers
 }
 
+func (b *bus) Use(middleware ...MiddlewareFunc) {
+	b.middleware = append(b.middleware, middleware...)
+}
+
 func (b *bus) Execute(ctx context.Context, cmd interface{}) error {
 	handler, err := b.handler(reflect.TypeOf(cmd).String())
 	if err != nil {
 		return err
 	}
 
-	fn := reflect.ValueOf(handler)
+	fn := reflect.ValueOf(chain(handler, b.middleware...))
 	args := buildHandlerArgs([]interface{}{ctx, cmd})
 
 	results := buildHandlerResults(fn.Call(args))
@@ -98,4 +111,12 @@ func buildHandlerArgs(args []interface{}) []reflect.Value {
 	}
 
 	return reflectedArgs
+}
+
+func chain(h interface{}, middleware ...MiddlewareFunc) interface{} {
+	for i := len(middleware) - 1; i >= 0; i-- {
+		h = middleware[i](h)
+	}
+
+	return h
 }
