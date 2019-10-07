@@ -40,6 +40,10 @@ func New() CommandBus {
 }
 
 func (b *bus) Register(cmd interface{}, fn interface{}) error {
+	if err := validCmd(cmd); err != nil {
+		return err
+	}
+
 	cmdName := reflect.TypeOf(cmd).String()
 
 	if reflect.TypeOf(fn).Kind() != reflect.Func {
@@ -64,6 +68,10 @@ func (b *bus) Use(middleware ...MiddlewareFunc) {
 }
 
 func (b *bus) Execute(ctx context.Context, cmd interface{}) error {
+	if err := validCmd(cmd); err != nil {
+		return err
+	}
+
 	handler, err := b.handler(reflect.TypeOf(cmd).String())
 	if err != nil {
 		return err
@@ -119,4 +127,13 @@ func chain(h interface{}, middleware ...MiddlewareFunc) interface{} {
 	}
 
 	return h
+}
+
+func validCmd(cmd interface{}) error {
+	value := reflect.ValueOf(cmd)
+	if value.Kind() != reflect.Ptr || !value.IsNil() && value.Elem().Kind() != reflect.Struct {
+		return errors.New("only pointer to commands are allowed")
+	}
+
+	return nil
 }
