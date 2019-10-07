@@ -26,6 +26,7 @@ func ErrorCmdHandler(ctx context.Context, cmd *ErrorCmd) error {
 
 func TestRegisterHandlers(t *testing.T) {
 	bus := New()
+
 	if err := bus.Register(&Cmd{}, CmdHandler); err != nil {
 		t.Errorf("Failed to register command: %v", err)
 	}
@@ -43,6 +44,7 @@ func TestRegisterHandlers(t *testing.T) {
 	// invalid handler
 	fooCmd := struct{}{}
 	invalidHandler := struct{}{}
+
 	if err := bus.Register(fooCmd, invalidHandler); err == nil {
 		t.Error("Invalid handler was accepted. Register must only accept functions")
 	}
@@ -55,6 +57,7 @@ func TestRegisterHandlers(t *testing.T) {
 
 func TestExecuteRegisteredHandler(t *testing.T) {
 	bus := New()
+
 	if err := bus.Register(&Cmd{}, CmdHandler); err != nil {
 		t.Errorf("Failed to register command: %v", err)
 	}
@@ -74,6 +77,7 @@ func TestExecuteRegisteredHandler(t *testing.T) {
 
 	// try to execute an unregistered command
 	invalidCommand := struct{}{}
+
 	if err := bus.Execute(context.Background(), invalidCommand); err == nil {
 		t.Error("Invalid command was executed without errors")
 	}
@@ -81,12 +85,14 @@ func TestExecuteRegisteredHandler(t *testing.T) {
 
 func TestExecutionReturnedError(t *testing.T) {
 	bus := New()
+
 	if err := bus.Register(&ErrorCmd{}, ErrorCmdHandler); err != nil {
 		t.Errorf("Failed to register command: %v", err)
 	}
 
 	cmd := &ErrorCmd{err: errors.New("this is an error")}
 	err := bus.Execute(context.Background(), cmd)
+
 	if err != cmd.err {
 		t.Errorf("Failed to assert command error. Expected \"%v\", got \"%v\"", cmd.err, err)
 	}
@@ -94,24 +100,25 @@ func TestExecutionReturnedError(t *testing.T) {
 
 func TestExecutionWithMiddleware(t *testing.T) {
 	bus := New()
+
 	if err := bus.Register(&Cmd{}, CmdHandler); err != nil {
 		t.Errorf("Failed to register command: %v", err)
 	}
 
 	// this middleware will be executed before the handler,
-	// making the command counter equals to 10.
-	bus.Use(func(next interface{}) interface{} {
-		return func(ctx context.Context, cmd interface{}) interface{} {
+	// making the command counter equals to 11.
+	bus.Use(func(next HandlerFunc) HandlerFunc {
+		return func(ctx context.Context, cmd interface{}) error {
 			if c, ok := cmd.(*Cmd); ok {
 				c.c += 10 // add 10 to the command value
 			}
 
-			return next
+			return next(ctx, cmd)
 		}
 	})
 
 	c := &Cmd{}
-	expected := 10
+	expected := 11
 	if err := bus.Execute(context.Background(), c); err != nil {
 		t.Errorf("Failed to execute command: %v", err)
 	}
