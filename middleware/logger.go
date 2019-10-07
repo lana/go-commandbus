@@ -5,14 +5,20 @@ import (
 	"encoding/json"
 	"log"
 	"reflect"
+
+	"github.com/vsmoraes/go-commandbus"
 )
 
-func Logger(next interface{}) interface{} {
-	return func(ctx context.Context, cmd interface{}) interface{} {
+func Logger(next commandbus.HandlerFunc) commandbus.HandlerFunc {
+	return func(ctx context.Context, cmd interface{}) error {
+		if err := next(ctx, cmd); err != nil {
+			return err
+		}
+
 		n := reflect.TypeOf(cmd).String()
 		buf, _ := json.Marshal(cmd)
 		log.Printf("Executing command \"%s\" with params: %s", n, buf)
 
-		return next
+		return nil
 	}
 }
