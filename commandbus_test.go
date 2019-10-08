@@ -24,6 +24,11 @@ func ErrorCmdHandler(ctx context.Context, cmd *ErrorCmd) error {
 	return cmd.err
 }
 
+type NoReturnCmd struct{}
+
+func NoReturnHandler(ctx context.Context, cmd *NoReturnCmd) {
+}
+
 func TestRegisterHandlers(t *testing.T) {
 	bus := New()
 
@@ -41,11 +46,18 @@ func TestRegisterHandlers(t *testing.T) {
 		}
 	}
 
-	// invalid handler
+	// invalid handler non-pointer
 	fooCmd := struct{}{}
 	invalidHandler := struct{}{}
 
 	if err := bus.Register(fooCmd, invalidHandler); err == nil {
+		t.Error("Invalid handler was accepted. Register must only accept pointers")
+	}
+
+	// invalid handler non-func
+	invalidHandlerFunc := &struct{}{}
+
+	if err := bus.Register(&Cmd{}, invalidHandlerFunc); err == nil {
 		t.Error("Invalid handler was accepted. Register must only accept functions")
 	}
 
@@ -81,6 +93,14 @@ func TestExecuteRegisteredHandler(t *testing.T) {
 	if err := bus.Execute(context.Background(), invalidCommand); err == nil {
 		t.Error("Invalid command was executed without errors")
 	}
+
+	if err := bus.Register(&NoReturnCmd{}, NoReturnHandler); err != nil {
+		t.Errorf("Failed to register command: %v", err)
+	}
+
+	if err := bus.Execute(context.Background(), &NoReturnCmd{}); err != nil {
+		t.Errorf("failed to execute command: expected %v, got %v", nil, err)
+	}
 }
 
 func TestExecutionReturnedError(t *testing.T) {
@@ -95,6 +115,10 @@ func TestExecutionReturnedError(t *testing.T) {
 
 	if err != cmd.err {
 		t.Errorf("Failed to assert command error. Expected \"%v\", got \"%v\"", cmd.err, err)
+	}
+
+	if err := bus.Execute(context.Background(), &struct{}{}); err == nil {
+		t.Errorf("failed to assert execute error. Expected an error, got: %v", err)
 	}
 }
 
