@@ -1,10 +1,10 @@
 # GO CommandBus
 
-[![Build Status](https://img.shields.io/travis/vsmoraes/go-commandbus/master.svg?style=flat-square)](https://travis-ci.org/vsmoraes/go-commandbus)
-[![Codecov branch](https://img.shields.io/codecov/c/github/vsmoraes/go-commandbus/master.svg?style=flat-square)](https://codecov.io/gh/vsmoraes/go-commandbus)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/github.com/vsmoraes/go-commandbus)
-[![Go Report Card](https://goreportcard.com/badge/github.com/vsmoraes/go-commandbus?style=flat-square)](https://goreportcard.com/report/github.com/vsmoraes/go-commandbus)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/vsmoraes/go-commandbus/blob/master/LICENSE)
+[![Build Status](https://img.shields.io/travis/lana/go-commandbus/master.svg?style=flat-square)](https://travis-ci.org/lana/go-commandbus)
+[![Codecov branch](https://img.shields.io/codecov/c/github/lana/go-commandbus/master.svg?style=flat-square)](https://codecov.io/gh/lana/go-commandbus)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/github.com/lana/go-commandbus)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lana/go-commandbus?style=flat-square)](https://goreportcard.com/report/github.com/lana/go-commandbus)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/lana/go-commandbus/blob/master/LICENSE)
 
 A slight and pluggable command-bus for Go.
 
@@ -12,12 +12,12 @@ A slight and pluggable command-bus for Go.
 
 Use go get.
 ```sh
-$ go get github.com/vsmoraes/go-commandbus
+$ go get github.com/lana/go-commandbus
 ```
 
 Then import the package into your own code:
 ```
-import "github.com/vsmoraes/go-commandbus"
+import "github.com/lana/go-commandbus"
 ```
 
 ## Usage
@@ -28,7 +28,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/vsmoraes/go-commandbus"
+	"github.com/lana/go-commandbus"
 )
 
 type CreateUser struct {
@@ -60,4 +60,4 @@ func main() {
 
 ## License
 
-This project is released under the MIT licence. See [LICENSE](https://github.com/vsmoraes/go-commandbus/blob/master/LICENSE) for more details.
+This project is released under the MIT licence. See [LICENSE](https://github.com/lana/go-commandbus/blob/master/LICENSE) for more details.

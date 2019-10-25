@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/vsmoraes/go-dispatcher"
+	"github.com/lana/go-dispatcher"
 )
 
 func TestDispatcher(t *testing.T) {

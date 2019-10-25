@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/vsmoraes/go-commandbus"
-	"github.com/vsmoraes/go-dispatcher"
+	"github.com/lana/go-commandbus"
+	"github.com/lana/go-dispatcher"
 )
 
 const (

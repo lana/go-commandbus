@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	commandbus "github.com/vsmoraes/go-commandbus"
+	commandbus "github.com/lana/go-commandbus"
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/tag"

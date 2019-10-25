@@ -6,7 +6,7 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/vsmoraes/go-commandbus"
+	"github.com/lana/go-commandbus"
 )
 
 func Logger(next commandbus.HandlerFunc) commandbus.HandlerFunc {
