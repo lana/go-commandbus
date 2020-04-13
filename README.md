@@ -47,13 +47,15 @@ func main() {
 	err := bus.Register(&CreateUser{}, CreateHandler)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
+		os.Exit(1)
 	}
 
 	err = bus.Execute(context.Background(), &CreateUser{"go-commandbus"})
 
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
+		os.Exit(1)
 	}
 }
 ```
