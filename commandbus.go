@@ -37,9 +37,10 @@ type bus struct {
 	middleware []MiddlewareFunc
 }
 
+// New creates a new command bus.
 func New() CommandBus {
 	return &bus{
-		handlers:   make(handlers, 0),
+		handlers:   make(handlers),
 		middleware: make([]MiddlewareFunc, 0),
 	}
 }

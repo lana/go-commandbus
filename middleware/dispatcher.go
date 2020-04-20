@@ -11,7 +11,10 @@ import (
 )
 
 const (
+	// DispatcherReceived event raised when a dispatcher has been received.
 	DispatcherReceived = "received"
+
+	// DispatcherExecuted event raised when a dispatcher has been executed.
 	DispatcherExecuted = "executed"
 )
 
@@ -20,6 +23,7 @@ type event struct {
 	cmd  interface{}
 }
 
+// Type returns the event type.
 func (e event) Type() dispatcher.EventType {
 	name := reflect.TypeOf(e.cmd).Elem().Name()
 	name = fmt.Sprintf("%s.%s", strings.ToLower(name), e.name)
@@ -27,6 +31,7 @@ func (e event) Type() dispatcher.EventType {
 	return dispatcher.EventType(name)
 }
 
+// Data returns the event command data.
 func (e event) Data() interface{} {
 	return e.cmd
 }

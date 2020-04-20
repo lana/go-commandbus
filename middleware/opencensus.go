@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/pkg/errors"
 	commandbus "github.com/lana/go-commandbus"
+	"github.com/pkg/errors"
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/tag"
@@ -22,7 +22,7 @@ var (
 	// Tag keys
 	commandName = tag.MustNewKey("command.name")
 
-	// Views
+	// OpenCensusExecCount view.
 	OpenCensusExecCount = &view.View{
 		Name:        "execution_count",
 		Measure:     ocExecCount,
@@ -30,6 +30,7 @@ var (
 		Aggregation: view.Count(),
 	}
 
+	// OpenCensusErrCount view.
 	OpenCensusErrCount = &view.View{
 		Name:        "error_count",
 		Measure:     ocErrCount,
@@ -37,6 +38,7 @@ var (
 		Aggregation: view.Count(),
 	}
 
+	// OpenCensusExecCountByCommand view.
 	OpenCensusExecCountByCommand = &view.View{
 		Name:        "execution_count_by_command",
 		Measure:     ocExecCount,
@@ -45,6 +47,7 @@ var (
 		Aggregation: view.Count(),
 	}
 
+	// OpenCensusErrCountByCommand view.
 	OpenCensusErrCountByCommand = &view.View{
 		Name:        "error_count_by_command",
 		Measure:     ocErrCount,
