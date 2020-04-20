@@ -9,6 +9,7 @@ import (
 	"github.com/lana/go-commandbus"
 )
 
+// Logger middleware to log the event command.
 func Logger(next commandbus.HandlerFunc) commandbus.HandlerFunc {
 	return func(ctx context.Context, cmd interface{}) error {
 		if err := next(ctx, cmd); err != nil {
