@@ -1,0 +1,61 @@
+---
+# yamllint disable rule:key-ordering
+stages:
+- tag
+- test
+
+.git: &git_template
+  before_script:
+  - printf "machine gitlab.lana.tech login github-bot password ${GITLAB_TOKEN}\nmachine github.com login lana-dev password ${GITHUB_ACCESS_TOKEN}" > ~/.netrc
+  - git config --global url."https://lana-dev:${GITHUB_ACCESS_TOKEN}@github.com".insteadOf "https://github.com"
+
+.go: &go
+  image: gitlab.lana.tech:5005/infrastructure/docker/docker-ci-golang-alpine/docker-ci-golang-alpine:latest
+
+tag:
+  stage: tag
+  image: gitlab.lana.tech:5005/infrastructure/docker/docker-base-alpine/docker-base-alpine:latest
+  script:
+  - bash "./scripts/tag.sh"
+  only:
+  - master
+
+tag-check:
+  stage: test
+  image: gitlab.lana.tech:5005/infrastructure/docker/docker-base-alpine/docker-base-alpine:latest
+  script:
+  - bash "${CI_SCRIPTS}/tag-check.sh"
+  except:
+  - master
+  - tags
+
+go-linter:
+  <<: *git_template
+  <<: *go
+  stage: test
+  script:
+  - go mod download
+  - |
+        go mod tidy
+        if [ -n "$(git -c color.ui=always diff | head -n25)" ]; then
+            echo -e "***\n***\n*** Please run 'go mod tidy':\n***\n***"
+            git -c color.ui=always diff | head -n25
+            exit 1
+        fi
+  - golangci-lint run ./...
+  - find . -type f -regex '.*\.ya?ml\(lint\)?' -not -path "./helm/*/templates/*" -print0 | xargs -0 -r yamllint -s
+  - find . -type f -name '*.sh' -print0 | xargs -0 -r shellcheck -x
+  - if [ -d ./helm ]; then helm lint ./helm/*; fi
+  except:
+  - master
+  - /v\d+\.\d+\.\d+$/
+
+go-test:
+  <<: *git_template
+  <<: *go
+  stage: test
+  script:
+  - go build ./...
+  - go test -race ./... -tags=update
+  except:
+  - master

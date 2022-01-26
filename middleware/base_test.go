@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 
-	"github.com/pkg/errors"
+	"go.lana.tech/errors"
 )
 
 // CreateUser command for testing.

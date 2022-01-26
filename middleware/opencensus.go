@@ -7,11 +7,12 @@ import (
 	"strings"
 
 	commandbus "github.com/lana/go-commandbus"
-	"github.com/pkg/errors"
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/tag"
 	"go.opencensus.io/trace"
+
+	"go.lana.tech/errors"
 )
 
 var (
@@ -98,9 +99,8 @@ func OpenCensusWithConfig(cfg OpenCensusConfig) commandbus.MiddlewareFunc {
 			defer span.End()
 
 			ctx, err := tag.New(ctx, tag.Upsert(commandName, name))
-
 			if err != nil {
-				return errors.Wrap(err, "unable to create the tag")
+				return errors.Errorf("unable to create the tag: %w", err)
 			}
 
 			stats.Record(ctx, ocExecCount.M(1))
